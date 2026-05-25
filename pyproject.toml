@@ -1,0 +1,25 @@
+# Configuração mínima do projeto Python — focada em pytest + ruff.
+# Dependências continuam em requirements.txt (instalação clássica).
+
+[tool.pytest.ini_options]
+markers = [
+    "integration: testes que exigem dados_normalizados/silver/ presentes localmente (pulados no CI)",
+]
+testpaths = ["app/backend"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.ruff.lint]
+# Conjunto enxuto: pyflakes (F) + pycodestyle errors (E) + import order (I).
+# A base do hackathon não foi escrita pensando em lint estrito; promover regras
+# adicionais conforme o código for limpo nas próximas fases.
+select = ["F", "E", "I"]
+ignore = [
+    "E501",  # line-too-long: muitos prompts longos no código; encarar depois.
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Re-exports e __init__ vazios.
+"__init__.py" = ["F401"]

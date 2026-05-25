@@ -1,9 +1,19 @@
-"""Testes do match: score() (pura) e compute_match() (geometria)."""
+"""Testes do match: score() (pura) e compute_match() (geometria).
+
+Os testes de compute_match() são marcados como `integration` porque dependem
+dos CSVs em dados_normalizados/silver/ (gitignored). No CI rodamos só os
+testes puros (`pytest -m "not integration"`); o teste de integração é
+executado localmente quando os dados estão presentes.
+"""
 from __future__ import annotations
 
+import pytest
+
 from app.backend.match import score as scoremod
-from app.backend.match.engine import compute_match
-from app.backend.report import models as M
+
+# Imports pesados (duckdb, models pydantic) ficam dentro dos testes de
+# integração para que `pytest -m "not integration"` no CI não exija a
+# instalação dessas deps só para validar as funções puras de score().
 
 CAMADAS_VALIDAS = {"mancha", "fator", "dinamica", "lacuna_camera"}
 
@@ -51,7 +61,11 @@ def test_score_no_intervalo():
 # ---------------------------------------------------------------------------
 
 
+@pytest.mark.integration
 def test_compute_match_area20():
+    from app.backend.match.engine import compute_match
+    from app.backend.report import models as M
+
     r = compute_match(20)
     assert isinstance(r, M.MatchResult)
     assert r.areaId == 20
@@ -70,7 +84,10 @@ def test_compute_match_area20():
         assert c.cobertura.lacuna == (c.cobertura.camerasRaio == 0)
 
 
+@pytest.mark.integration
 def test_compute_match_camadas_area_validas():
+    from app.backend.match.engine import compute_match
+
     r = compute_match(20)
     assert set(c for c in r.camadasArea).issubset(
         {"mancha", "fator", "dinamica"}

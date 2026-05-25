@@ -14,8 +14,7 @@ import json
 import os
 from typing import Any, Callable, Dict, List, Optional
 
-from .. import config
-from .. import deps
+from .. import config, deps
 
 # ---------------------------------------------------------------------------
 # Helpers

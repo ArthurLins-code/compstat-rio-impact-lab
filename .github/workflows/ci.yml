@@ -1,0 +1,59 @@
+name: CI
+
+# Roda em PRs contra main e em pushes diretos. Mantém intencionalmente
+# enxuto (Fase 0): garante que o repo continua reproduzível, sem ambição
+# de cobertura. Testes que precisam de dados_normalizados/silver/ (gitignored)
+# são marcados como `integration` e pulados aqui — rodam localmente.
+
+on:
+  push:
+    branches: [main, arthur]
+  pull_request:
+    branches: [main]
+
+jobs:
+  backend:
+    name: Backend (Python)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Instalar deps + ruff + pytest
+        run: |
+          pip install -r requirements.txt
+          pip install ruff pytest
+
+      - name: Lint (ruff)
+        run: ruff check app/backend normalizacao
+
+      - name: Testes unitários (exclui integration que exige CSVs locais)
+        run: pytest app/backend -m "not integration" -v
+
+  frontend:
+    name: Frontend (TypeScript)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app/frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: app/frontend/package-lock.json
+
+      - name: Instalar deps
+        run: npm ci
+
+      - name: Type check
+        run: npx tsc --noEmit
+
+      - name: Build de produção
+        run: npm run build

@@ -1,5 +1,4 @@
 """Onda 1 — executa o silver determinístico, grava os CSVs e valida (sanity checks)."""
-import numpy as np
 import pandas as pd
 
 from . import config as C

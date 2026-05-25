@@ -6,7 +6,6 @@ quando este existir; caso contrário fica marcada como pendente.
 """
 import json
 
-import numpy as np
 import pandas as pd
 
 from . import config as C

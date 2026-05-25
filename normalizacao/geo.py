@@ -1,8 +1,8 @@
 """Helpers geográficos: parsing de WKT, correção de coordenadas, bbox e point-in-polygon."""
 import numpy as np
+import shapefile  # pyshp
 import shapely
 from shapely import STRtree
-import shapefile  # pyshp
 
 from . import config as C
 

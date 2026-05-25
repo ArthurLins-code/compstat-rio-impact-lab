@@ -20,7 +20,7 @@ def main():
     disque_lotes = E.preparar_disque(areas)
 
     n_docs = len({u["doc_id"] for u in relint_units})
-    n_relatos = sum(len(l["relatos"]) for l in disque_lotes)
+    n_relatos = sum(len(lote["relatos"]) for lote in disque_lotes)
     print(f"RELINT: {len(relint_units)} unidades de {n_docs} documentos")
     print(f"Disque: {len(disque_lotes)} lotes, {n_relatos} relatos (teto {E.MAX_RELATOS_POR_AREA}/área)")
 
@@ -30,7 +30,9 @@ def main():
         return
 
     # tarefas unificadas (cada uma vira uma chamada ao Claude)
-    tarefas = [("RELINT", u) for u in relint_units] + [("DISQUE_DENUNCIA", l) for l in disque_lotes]
+    tarefas = [("RELINT", u) for u in relint_units] + [
+        ("DISQUE_DENUNCIA", lote) for lote in disque_lotes
+    ]
     total = len(tarefas)
     out_path = C.OUT_SILVER / "dinamica_extraida.csv"
 

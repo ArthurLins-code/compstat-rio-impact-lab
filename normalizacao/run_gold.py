@@ -1,6 +1,6 @@
 """Onda 3 — gera a camada gold (area_brief + tabelas longas) e os entregáveis de entendimento."""
 from . import config as C
-from . import gold, export
+from . import export, gold
 
 
 def main():
