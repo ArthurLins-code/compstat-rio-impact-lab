@@ -6,7 +6,7 @@ Repositório de dados e protótipo desenvolvidos para o Claude Impact Lab Rio, c
 
 ## 🎯 O Desafio
 
-**Arquivo de referência:** `Briefing_Hackathon_Desenvolvedores_CompStat.pdf`
+**Arquivo de referência:** [`docs/midia/Briefing_Hackathon_Desenvolvedores_CompStat-2.pdf`](docs/midia/Briefing_Hackathon_Desenvolvedores_CompStat-2.pdf)
 
 O CompStat Municipal é o modelo de gestão de segurança pública da Prefeitura do Rio de Janeiro. Inspirado no CompStat do NYPD e adaptado à realidade municipal, ele combina análise de dados criminais, inteligência territorial e coordenação entre órgãos para orientar decisões operacionais baseadas em evidências. O modelo opera sobre 22 áreas prioritárias, definidas com base nas manchas criminais de roubo e furto, com emprego estratégico da Força Municipal (Divisão de Elite da Guarda Municipal - FM) e atuação sobre fatores urbanos que favorecem o crime (20 fatores mapeados), como iluminação, vegetação, desordem urbana, obstrução de calçadas, entre outros. Enquanto a FM irá realizar o policiamento ostensivo e preventivo nas áreas de maior incidência de furto e roubo, os órgãos municipais (Comlurb, SECONSERVA, SMAS, RioLuz, SEOP, Guarda Municipal, dentre outros) irão priorizar a resolução dos fatores ambientais nos polígonos de atuação da FM.
 
@@ -54,7 +54,15 @@ claude_impact_lab_compstat_rio/
 │   ├── areas_forca_municipal.prj
 │   ├── areas_forca_municipal.cpg
 │   └── areas_forca_municipal.qmd
-├── Briefing_Hackathon_Desenvolvedores_CompStat.pdf               # Briefing técnico do desafio
+├── app/                                                          # Backend FastAPI + Frontend React (protótipo)
+├── normalizacao/                                                 # Pipeline bronze -> silver -> gold
+├── dados_normalizados/                                           # Saída da pipeline (fonte de verdade do app)
+├── docs/                                                         # Documentação e plano de produtização
+│   ├── plano/                                                    # Plano de evolução em fases + specs
+│   └── midia/                                                    # Entregáveis do hackathon (briefing, slides, vídeo)
+├── proximas_ideias.MD                                            # Backlog de itens diferidos
+├── requirements.txt                                              # Dependências Python (backend + normalização)
+└── README.md
 ```
 ---
 
