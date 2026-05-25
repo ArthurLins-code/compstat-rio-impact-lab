@@ -123,7 +123,28 @@ def stream_chat(
     Quando `config.PERSISTENT_STATE`, cada chamada vira uma linha em
     `copilot_eventos` (registrada no início, consolidada com tokens/custo
     no `done`). `usuario` é placeholder até existir login.
+
+    Guardrails (Tarefa 3.5) rodam antes da auditoria — rate limit, kill
+    switch e teto diário de custo. Cada um devolve uma mensagem amigável
+    diferente.
     """
+    # Guardrails operacionais — falham antes de qualquer call ao Claude.
+    from . import guardrails as _G
+    try:
+        _G.verificar_todos(usuario=usuario)
+    except _G.RateLimitError as e:
+        yield {"type": "error", "message": "Muitas requisições seguidas. Aguarde um instante."}
+        yield {"type": "done"}
+        return
+    except _G.IADesativada as e:
+        yield {"type": "error", "message": str(e)}
+        yield {"type": "done"}
+        return
+    except _G.OrcamentoExcedido as e:
+        yield {"type": "error", "message": str(e)}
+        yield {"type": "done"}
+        return
+
     # Trilha de auditoria (Tarefa 3.1) — só quando o banco está ligado.
     evento_id = None
     if config.PERSISTENT_STATE:

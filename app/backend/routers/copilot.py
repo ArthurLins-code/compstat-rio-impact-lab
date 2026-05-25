@@ -36,11 +36,20 @@ class ChatBody(BaseModel):
 
 
 @router.post("/copilot/{area_id}/chat")
-async def chat(area_id: int, body: ChatBody):
-    """Stream de eventos do copiloto. Cada evento é serializado como JSON em `data:`."""
+async def chat(area_id: int, body: ChatBody, request=None):
+    """Stream de eventos do copiloto. Cada evento é serializado como JSON em `data:`.
+
+    `usuario` para rate limit/custo (Tarefa 3.5) é o IP da origem — placeholder
+    até proximas_ideias.MD#3 trazer login.
+    """
+    from fastapi import Request as _Req
+    # FastAPI injeta automaticamente o Request quando o tipo bate.
+    usuario = "anonimo"
+    if isinstance(request, _Req):
+        usuario = "ip:" + (request.client.host if request.client else "desconhecido")
 
     def gen():
-        for evento in copilot.stream_chat(area_id, body.messages, body.secaoFoco):
+        for evento in copilot.stream_chat(area_id, body.messages, body.secaoFoco, usuario=usuario):
             yield {"data": json.dumps(evento, ensure_ascii=False, default=str)}
 
     return EventSourceResponse(gen())
