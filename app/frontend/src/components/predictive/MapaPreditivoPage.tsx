@@ -60,7 +60,7 @@ export function MapaPreditivoPage({ onGoHome }: { onGoHome: () => void }) {
           <button
             type="button"
             className="pred-mode__btn"
-            aria-pressed={modo === 'oficial'}
+            aria-pressed={modo === 'oficial' ? 'true' : 'false'}
             onClick={() => setModo('oficial')}
           >
             Modelo oficial
@@ -68,7 +68,7 @@ export function MapaPreditivoPage({ onGoHome }: { onGoHome: () => void }) {
           <button
             type="button"
             className="pred-mode__btn"
-            aria-pressed={modo === 'live'}
+            aria-pressed={modo === 'live' ? 'true' : 'false'}
             onClick={() => setModo('live')}
           >
             Ao vivo
@@ -92,7 +92,7 @@ export function MapaPreditivoPage({ onGoHome }: { onGoHome: () => void }) {
                 key={t.id}
                 type="button"
                 role="tab"
-                aria-selected={tab === t.id}
+                aria-selected={tab === t.id ? 'true' : 'false'}
                 className={`pred-tab ${tab === t.id ? 'pred-tab--active' : ''}`}
                 onClick={() => setTab(t.id)}
               >
