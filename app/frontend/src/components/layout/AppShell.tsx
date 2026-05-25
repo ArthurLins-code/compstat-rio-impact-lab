@@ -18,6 +18,10 @@ export function AppShell({ onGoHome, onOpenPredictive }: { onGoHome: () => void;
 
   return (
     <div className={`shell ${copilotOpen ? 'shell--copilot' : ''}`}>
+      {/* Skip link (Tarefa 4.2 / WCAG 2.4.1): pula direto para o relatório. */}
+      <a className="skip-link" href="#report-main">
+        Pular para o conteúdo
+      </a>
       <TopBar
         copilotOpen={copilotOpen}
         onToggleCopilot={() => setCopilotOpen((v) => !v)}
@@ -29,7 +33,7 @@ export function AppShell({ onGoHome, onOpenPredictive }: { onGoHome: () => void;
         <SectionNav />
       </aside>
 
-      <main className="shell__main">
+      <main className="shell__main" id="report-main" tabIndex={-1}>
         <DraftBanner />
         <div className="shell__scroll">
           <ReportView />

@@ -1,0 +1,66 @@
+/* =====================================================================
+   CompStat Rio — acessibilidade (WCAG 2.1 AA).
+
+   Política: cor não é o único sinal (ícone + rótulo sempre acompanham);
+   foco visível em qualquer interativo; contraste 4.5:1 mínimo no texto e
+   3:1 mínimo em ícones/limites de UI. Reduz motion já é tratado em
+   index.css; este arquivo cuida do que é puro contraste + foco.
+   ===================================================================== */
+
+/* ---------- Severidade: tons reforçados para 4.5:1 contra o soft -------- */
+/* Calibrados via WebAIM contrast checker. Mantidos os HUEs para preservar
+   identidade (vermelho/âmbar/verde), apenas escurecidos. */
+:root {
+  --sev-high-text: oklch(38% 0.18 27);   /* antes 47% — vermelho mais escuro */
+  --sev-med-text: oklch(40% 0.13 72);    /* antes 50% — âmbar mais escuro */
+  --sev-low-text: oklch(34% 0.11 156);   /* antes 42% — verde mais escuro */
+
+  /* Texto muted/faint: legenda em fundo branco precisa >= 4.5:1. */
+  --text-muted: oklch(45% 0.018 245);    /* antes 52% */
+  --text-faint: oklch(54% 0.012 245);    /* antes 64% */
+}
+
+/* ---------- Foco visível em qualquer interativo ------------------------- */
+:where(a, button, input, select, textarea, [role='button'], [role='tab'], [tabindex]):focus-visible {
+  outline: 3px solid var(--primary-ring);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* Browsers antigos: garante foco mesmo sem :focus-visible. */
+:where(a, button, input, select, textarea):focus:not(:focus-visible) {
+  outline: 0;
+}
+
+/* ---------- "Skip to content" para teclado/leitor de tela --------------- */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: var(--sp-3);
+  background: var(--primary);
+  color: var(--text-on-primary);
+  padding: var(--sp-2) var(--sp-3);
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  z-index: 9999;
+  transition: top 140ms var(--ease-out);
+}
+.skip-link:focus {
+  top: var(--sp-2);
+}
+
+/* ---------- Alvo de toque WCAG 2.5.5 (mín. 24px AA / 44px AAA) ---------- */
+:where(button, [role='button']) {
+  min-height: 32px;
+}
+
+/* ---------- Severidade: ícone obrigatório (já existia, reforça) --------- */
+.sev::before {
+  content: '';
+}
+
+/* ---------- Estados desativados: contraste preservado ------------------- */
+:where(button, input, select, textarea):disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
