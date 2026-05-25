@@ -12,7 +12,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from . import config
-from .routers import ai, areas, copilot, export, match, report
+from .routers import acoes, ai, areas, copilot, export, match, report
 
 app = FastAPI(title="CompStat Rio — Backend", version="0.1.0")
 
@@ -30,6 +30,7 @@ app.include_router(match.router, prefix="/api")
 app.include_router(ai.router, prefix="/api")
 app.include_router(copilot.router, prefix="/api")
 app.include_router(export.router, prefix="/api")
+app.include_router(acoes.router, prefix="/api")
 
 
 @app.on_event("startup")
