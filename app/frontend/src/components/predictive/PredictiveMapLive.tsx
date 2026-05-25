@@ -123,7 +123,7 @@ export function PredictiveMapLive({ areaId }: { areaId: number }) {
       m.on('click', 'risk-circles', (e) => {
         const f = e.features?.[0]
         if (!f || f.geometry.type !== 'Point') return
-        const coords = (f.geometry as { coordinates: [number, number] }).coordinates
+        const coords = (f.geometry as unknown as { coordinates: [number, number] }).coordinates
         const p = f.properties as Hexagono
         new maplibregl.Popup({ offset: 12 })
           .setLngLat(coords)

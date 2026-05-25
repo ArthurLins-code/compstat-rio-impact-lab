@@ -1,6 +1,7 @@
 // HealthBadge — sinal global de frescor dos dados (Tarefa 5.2).
 // Aparece no topo da Home: se algum dataset crítico está atrasado, o
 // gestor sabe antes de abrir o relatório.
+import type { ReactElement } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { fetchHealthData } from '../../api/reports'
 import type { StatusFrescor } from '../../api/types'
@@ -11,7 +12,7 @@ const ROTULO: Record<StatusFrescor, string> = {
   vermelho: 'Dados desatualizados',
 }
 
-const ICONE: Record<StatusFrescor, JSX.Element> = {
+const ICONE: Record<StatusFrescor, ReactElement> = {
   verde: (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
       <path d="M20 6L9 17l-5-5" />
