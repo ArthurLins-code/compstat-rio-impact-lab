@@ -25,6 +25,14 @@ MODEL = os.environ.get("COMPSTAT_MODEL", "claude-sonnet-4-6")
 CORS_ORIGINS = [o.strip() for o in os.environ.get("CORS_ORIGINS", "http://localhost:5173").split(",")]
 DISQUE_AMOSTRA_LIMITE = 25
 
+# --- Persistência (Fase 2) ---
+# Default off: protege quem já roda em memória. Ligar exige rede interna
+# controlada — não há login ainda (proximas_ideias.MD#3).
+PERSISTENT_STATE = os.environ.get("COMPSTAT_PERSISTENT_STATE", "0").lower() in {
+    "1", "true", "yes", "on",
+}
+DB_URL = os.environ.get("COMPSTAT_DB_URL", "sqlite:///./compstat.db")
+
 # --- Caminhos e domínio (reusados da pipeline) ---
 OUT_GOLD = C.OUT_GOLD
 OUT_SILVER = C.OUT_SILVER

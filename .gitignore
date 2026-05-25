@@ -19,6 +19,10 @@ dist/
 # === OS ===
 .DS_Store
 
+# === SQLite (Fase 2) ===
+*.db
+*.db-journal
+
 # === Dados sensíveis / PII / LGPD ===
 # Dados granulares (brutos e silver) não vão para o versionamento.
 # Eles vivem localmente; o app os lê do disco. Os agregados em gold/ (nível de área,

@@ -32,6 +32,14 @@ app.include_router(copilot.router, prefix="/api")
 app.include_router(export.router, prefix="/api")
 
 
+@app.on_event("startup")
+def _startup():
+    """Cria as tabelas do SQLite no primeiro boot quando o flag está ligado."""
+    if config.PERSISTENT_STATE:
+        from .db import init_db
+        init_db()
+
+
 @app.get("/api/health")
 def health():
     return {
@@ -39,4 +47,5 @@ def health():
         "areas": config.AREA_FM_IDS,
         "model": config.MODEL,
         "has_api_key": config.has_api_key(),
+        "persistent_state": config.PERSISTENT_STATE,
     }

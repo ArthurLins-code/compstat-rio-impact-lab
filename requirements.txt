@@ -24,3 +24,6 @@ pyshp>=2.3
 # --- Excel / Word ---
 openpyxl>=3.1
 python-docx>=1.1
+
+# --- Persistência (Fase 2) ---
+sqlalchemy>=2.0
