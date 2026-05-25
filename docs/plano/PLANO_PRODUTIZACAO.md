@@ -159,6 +159,8 @@ PSW = pessoa-semana.
 
 ## Fase 5 — Operação contínua + governança
 
+**Spec:** [`specs/fase5-operacao-continua.md`](specs/fase5-operacao-continua.md)
+
 **Escopo:**
 - Job agendado (cron simples ou Prefect): carga diária do 1746, recálculo
   silver/gold, re-extração de dinâmica para áreas com novos RELINTs.
