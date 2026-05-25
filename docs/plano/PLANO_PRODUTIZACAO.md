@@ -142,6 +142,8 @@ PSW = pessoa-semana.
 
 ## Fase 4 — Frontend pronto para gestor
 
+**Spec:** [`specs/fase4-frontend-gestor.md`](specs/fase4-frontend-gestor.md)
+
 **Escopo:**
 - `@media print` decente em `report.css` (gestor imprime sem perder mapa).
 - A11y WCAG 2.1 AA: contraste do `sev--*`, alt-text, ordem de foco.
