@@ -1,19 +1,24 @@
-"""Montagem do Relatorio completo + estado de edições humanas (em memória).
+"""Montagem do Relatorio completo + estado de edições humanas.
 
 `montar_relatorio` junta as seções determinísticas (sections.py) com o match
 (engine.compute_match). `aplicar_edicao` guarda overrides por (área, seção) e
 `get_relatorio` remonta e aplica esses overrides.
+
+Backend de overrides escolhido por `config.PERSISTENT_STATE`:
+- `False` (default) -> dict em RAM `REPORT_STATE` (legado).
+- `True` -> tabela `secoes_overrides` no SQLite (sobrevive a restart).
 """
 from __future__ import annotations
 
 from typing import Any, Dict, Optional
 
+from .. import config
 from ..match.engine import compute_match
 from . import models as M
 from . import periodo as P
 from . import sections as S
 
-# Estado de edição humana: REPORT_STATE[area_id][secao] = payload (dict).
+# Estado de edição humana em RAM — usado quando PERSISTENT_STATE=False.
 REPORT_STATE: Dict[int, Dict[str, Any]] = {}
 
 # Seções aceitas em PATCH (mapeadas para o campo do Relatorio).
@@ -72,11 +77,14 @@ _ALIAS_SECAO = {
 }
 
 
-def aplicar_edicao(area_id: int, secao: str, payload: dict) -> None:
-    """Guarda um override de edição humana para (área, seção).
+def aplicar_edicao(
+    area_id: int, secao: str, payload: dict, autor: str = "humano"
+) -> None:
+    """Guarda um override de edição (humana ou IA) para (área, seção).
 
     Aceita camelCase (campos do Relatorio) e snake_case (sectionId do copiloto),
-    normalizando para a chave canônica.
+    normalizando para a chave canônica. `autor` ('humano'|'ia') distingue a
+    origem da edição — alimenta o diff humano×IA da Tarefa 2.4.
     """
     secao = _ALIAS_SECAO.get(secao, secao)
     if secao not in SECOES_EDITAVEIS:
@@ -84,13 +92,25 @@ def aplicar_edicao(area_id: int, secao: str, payload: dict) -> None:
             "Seção não editável: %r (válidas: %s)"
             % (secao, ", ".join(sorted(SECOES_EDITAVEIS)))
         )
-    REPORT_STATE.setdefault(area_id, {})[secao] = payload
+    if config.PERSISTENT_STATE:
+        from ..db import overrides as O
+        O.salvar(area_id, secao, payload, autor=autor)
+    else:
+        REPORT_STATE.setdefault(area_id, {})[secao] = payload
+
+
+def _overrides_da_area(area_id: int) -> Dict[str, Any]:
+    """Devolve os overrides aplicáveis à área no backend ativo."""
+    if config.PERSISTENT_STATE:
+        from ..db import overrides as O
+        return O.carregar(area_id)
+    return REPORT_STATE.get(area_id, {})
 
 
 def get_relatorio(area_id: int, preset_periodo: Optional[str] = None) -> M.Relatorio:
     """Monta o relatório e aplica os overrides de edição humana, se houver."""
     rel = montar_relatorio(area_id, preset_periodo=preset_periodo)
-    overrides = REPORT_STATE.get(area_id, {})
+    overrides = _overrides_da_area(area_id)
     if not overrides:
         return rel
 

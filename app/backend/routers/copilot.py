@@ -57,7 +57,9 @@ def apply(area_id: int, body: ApplyBody):
     """Aplica a reescrita aceita pelo gestor (via assembler, ou fallback em memória)."""
     if _TEM_ASSEMBLER and aplicar_edicao is not None:
         try:
-            aplicar_edicao(area_id, body.secao, body.payload)
+            # `autor='ia'`: sugestão veio do copiloto, mesmo que o gestor tenha
+            # clicado "aceitar" — marca para o diff humano×IA (Tarefa 2.4).
+            aplicar_edicao(area_id, body.secao, body.payload, autor="ia")
             return {"ok": True}
         except Exception as e:
             return {"ok": False, "erro": str(e)}
