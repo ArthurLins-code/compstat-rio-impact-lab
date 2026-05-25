@@ -2,6 +2,7 @@
 // urgência, KPI de ocorrências, indicadores de apoio, pico e principal fator.
 import { AREAS_FM } from '../../api/types'
 import type { AreaResumo } from '../../api/types'
+import { CoverageBadge } from './CoverageBadge'
 
 const nf = new Intl.NumberFormat('pt-BR')
 
@@ -36,6 +37,7 @@ export function AreaCard({
       <div className="area-card__head">
         <span className="area-card__rank">{area.ranking}º</span>
         <span className={`sev ${urg.cls} area-card__sev`}>{urg.label}</span>
+        <CoverageBadge area={area} />
       </div>
 
       <h2 className="area-card__name">{nome}</h2>
