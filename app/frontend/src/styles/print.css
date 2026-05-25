@@ -1,0 +1,142 @@
+/* =====================================================================
+   CompStat Rio — estilos de impressão.
+   Pensado para a reunião do CompStat: gestor abre Ctrl+P, salva PDF A4 e
+   imprime sem perder informação. Esconde chrome (nav, copilot, topbar),
+   força fundo branco, evita quebras tortas e adiciona cabeçalho de página.
+   ===================================================================== */
+
+@page {
+  size: A4;
+  margin: 14mm;
+}
+
+/* Cabeçalho/rodapé só nas margens — definidos pelo browser; o título da
+   página vem do <title> do HTML (App.tsx atualiza para o nome da área). */
+
+@media print {
+  /* --- Fundo branco, texto carbono — contraste máximo de papel ---------- */
+  html,
+  body,
+  .shell,
+  .shell__main,
+  .shell__scroll {
+    background: #ffffff !important;
+    color: #15181d !important;
+  }
+
+  /* --- Esconde tudo que é "ferramenta" e não documento ------------------- */
+  .shell__nav,
+  .shell__copilot,
+  .topbar,
+  .secnav,
+  .draft-banner,
+  .section__ask,
+  .section__ask-label,
+  .copilot,
+  .area-card__cta,
+  .export-buttons,
+  button.btn--ghost,
+  button[aria-label*="copiloto" i],
+  button[aria-label*="Copiloto" i] {
+    display: none !important;
+  }
+
+  /* --- Layout flui sem grid de shell ------------------------------------ */
+  .shell {
+    display: block !important;
+    height: auto !important;
+  }
+  .shell__main,
+  .shell__scroll {
+    overflow: visible !important;
+    height: auto !important;
+  }
+
+  /* --- Cartões de seção: evita corte de página no meio ------------------ */
+  .section-card,
+  .area-card,
+  .pred-sidebar,
+  .pred-map {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    box-shadow: none !important;
+    border: 1px solid #c5c8cf !important;
+  }
+
+  /* --- Seções "grandes" começam em página nova -------------------------- */
+  .section-card[data-section='dinamicaCriminal'],
+  .section-card[data-section='planoAcao'],
+  .section-card[data-section='coincidencias'] {
+    break-before: page;
+    page-break-before: always;
+  }
+
+  /* --- Tabelas: cabeçalho repete em cada página ------------------------- */
+  table {
+    border-collapse: collapse;
+  }
+  thead {
+    display: table-header-group;
+  }
+  tr,
+  th,
+  td {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* --- Mapas (canvas WebGL) não imprimem confiável em todos browsers ---- */
+  /* Mostra placeholder textual avisando o leitor da versão impressa. */
+  .map,
+  .hotspot-map,
+  .pred-iframe,
+  .pred-map {
+    position: relative;
+  }
+  .map::after,
+  .hotspot-map::after,
+  .pred-iframe::after,
+  .pred-map::after {
+    content: '[ mapa interativo — disponível na versão digital ]';
+    display: block;
+    text-align: center;
+    color: #555;
+    font-size: 11pt;
+    padding: 12mm 0;
+    border: 1px dashed #aaa;
+    background: #fafbfc;
+  }
+
+  /* --- Links: imprime URL ao lado ---------------------------------------- */
+  a[href^='http']::after {
+    content: ' (' attr(href) ')';
+    font-size: 9pt;
+    color: #555;
+  }
+  a[href^='/']::after {
+    content: '';
+  }
+
+  /* --- Cabeçalho da primeira página: nome da área + período ------------- */
+  /* Inserido pelo React via <header data-print-cover>. Nas demais páginas
+     fica escondido. */
+  [data-print-cover] {
+    display: block !important;
+    border-bottom: 2px solid #15181d;
+    padding-bottom: 6mm;
+    margin-bottom: 8mm;
+  }
+  [data-print-cover] h1 {
+    font-size: 18pt;
+    margin: 0 0 2mm 0;
+  }
+  [data-print-cover] .print-period {
+    font-size: 11pt;
+    color: #555;
+  }
+}
+
+/* Fora do print: marcador continua escondido (só serve à versão impressa). */
+[data-print-cover] {
+  display: none;
+}

@@ -35,6 +35,17 @@ export function ReportView() {
 
   return (
     <div className="report">
+      {/* Cabeçalho visível só na impressão (Tarefa 4.1): identifica a folha. */}
+      <header data-print-cover>
+        <h1>
+          Área {String(report.areaId).padStart(2, '0')} — {report.nomeArea}
+        </h1>
+        <div className="print-period">
+          Período: {fmtDate(report.periodo.de)} – {fmtDate(report.periodo.ate)} ·{' '}
+          {ind.total.toLocaleString('pt-BR')} ocorrências · Severidade {SEVERITY_LABEL[sev]}
+        </div>
+      </header>
+
       <header className="report__header">
         <div className="report__heading">
           <span className="report__eyebrow">Relatório Analítico de Área · CompStat Municipal</span>
