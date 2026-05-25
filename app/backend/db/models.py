@@ -141,6 +141,35 @@ class RelatorioVersao(Base):
 # ---------------------------------------------------------------------------
 
 
+class RespostaCache(Base):
+    """Cache de respostas geradas por seção (Tarefa 3.3).
+
+    Chave determinística: hash de (area_brief, prompt_nome, prompt_versao,
+    secao). Mesma área + mesmo brief + mesmo prompt = mesma resposta — não
+    precisa chamar Claude de novo. `ultimo_uso_em` e `uso_count` ajudam a
+    decidir TTL/expurgo na Fase 5.
+    """
+
+    __tablename__ = "respostas_cache"
+
+    chave_hash: Mapped[str] = mapped_column(String(64), primary_key=True)
+    area_id: Mapped[int] = mapped_column(Integer, nullable=False, index=True)
+    secao: Mapped[str] = mapped_column(String(64), nullable=False)
+    prompt_nome: Mapped[str] = mapped_column(String(64), nullable=True)
+    prompt_versao: Mapped[int] = mapped_column(Integer, nullable=True)
+    conteudo: Mapped[dict] = mapped_column(JSON, nullable=False)
+    tokens_in: Mapped[int] = mapped_column(Integer, nullable=True)
+    tokens_out: Mapped[int] = mapped_column(Integer, nullable=True)
+    custo_usd: Mapped["Numeric"] = mapped_column(Numeric(10, 4), nullable=True)
+    uso_count: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+    criado_em: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=_now, nullable=False
+    )
+    ultimo_uso_em: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=_now, onupdate=_now, nullable=False
+    )
+
+
 class Prompt(Base):
     """Versão de um prompt nomeado (Tarefa 3.2).
 
