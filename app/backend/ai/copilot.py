@@ -116,8 +116,29 @@ def stream_chat(
     area_id: int,
     messages: List[Dict[str, Any]],
     secao_foco: Optional[str] = None,
+    usuario: str = "anonimo",
 ) -> Iterator[Dict[str, Any]]:
-    """Gera eventos do chat para SSE. `area_id` é a única área em escopo (server-fixed)."""
+    """Gera eventos do chat para SSE. `area_id` é a única área em escopo (server-fixed).
+
+    Quando `config.PERSISTENT_STATE`, cada chamada vira uma linha em
+    `copilot_eventos` (registrada no início, consolidada com tokens/custo
+    no `done`). `usuario` é placeholder até existir login.
+    """
+    # Trilha de auditoria (Tarefa 3.1) — só quando o banco está ligado.
+    evento_id = None
+    if config.PERSISTENT_STATE:
+        try:
+            from ..db import auditoria as _AUD
+            evento_id = _AUD.registrar(
+                area_id=area_id,
+                secao_foco=secao_foco,
+                usuario=usuario,
+                prompt_nome="copiloto",
+                prompt_hash_str=_AUD.hash_prompt(PR.SYS_COPILOTO),
+            )
+        except Exception:  # pragma: no cover - auditoria nunca pode bloquear o chat
+            evento_id = None
+
     if not config.has_api_key():
         yield {
             "type": "error",
@@ -156,6 +177,11 @@ def stream_chat(
     tools = _todas_tools()
     consultadas: List[str] = []  # ferramentas de consulta executadas nesta interação
 
+    # Acumuladores para consolidar a auditoria no final.
+    tokens_in_total = 0
+    tokens_out_total = 0
+    resposta_texto: List[str] = []
+
     try:
         for _turno in range(_MAX_TURNOS_TOOL):
             tool_uses: List[Any] = []
@@ -170,8 +196,14 @@ def stream_chat(
                     if event.type == "content_block_delta" and getattr(event.delta, "type", None) == "text_delta":
                         delta = event.delta.text
                         if delta:
+                            resposta_texto.append(delta)
                             yield {"type": "text", "delta": delta}
                 final = stream.get_final_message()
+                # Anthropic devolve usage no final.message.usage
+                usage = getattr(final, "usage", None)
+                if usage is not None:
+                    tokens_in_total += int(getattr(usage, "input_tokens", 0) or 0)
+                    tokens_out_total += int(getattr(usage, "output_tokens", 0) or 0)
 
             # Sem tool use -> resposta final; emite proveniência (se houve consultas) e encerra.
             if final.stop_reason != "tool_use":
@@ -186,6 +218,19 @@ def stream_chat(
                             "warnings": prov["warnings"],
                         },
                     }
+                if evento_id is not None:
+                    try:
+                        from ..db import auditoria as _AUD
+                        _AUD.consolidar(
+                            evento_id,
+                            tokens_in=tokens_in_total,
+                            tokens_out=tokens_out_total,
+                            ferramentas=list(set(consultadas)),
+                            resposta_resumo="".join(resposta_texto)[:500],
+                            modelo=config.MODEL,
+                        )
+                    except Exception:  # pragma: no cover
+                        pass
                 yield {"type": "done"}
                 return
 

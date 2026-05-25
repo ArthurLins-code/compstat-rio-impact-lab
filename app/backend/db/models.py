@@ -156,11 +156,14 @@ class CopilotEvento(Base):
     secao_foco: Mapped[str] = mapped_column(String(64), nullable=True)
     usuario: Mapped[str] = mapped_column(String(64), nullable=False, default="anonimo")
     prompt_hash: Mapped[str] = mapped_column(String(64), nullable=True)
+    prompt_nome: Mapped[str] = mapped_column(String(64), nullable=True)
+    prompt_versao: Mapped[int] = mapped_column(Integer, nullable=True)
     ferramentas: Mapped[list] = mapped_column(JSON, nullable=True)
     tokens_in: Mapped[int] = mapped_column(Integer, nullable=True)
     tokens_out: Mapped[int] = mapped_column(Integer, nullable=True)
     custo_usd: Mapped["Numeric"] = mapped_column(Numeric(10, 4), nullable=True)
     resposta_resumo: Mapped[str] = mapped_column(String, nullable=True)
+    cache_hit: Mapped[bool] = mapped_column(Integer, nullable=False, default=0)
     registrado_em: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=_now, nullable=False
     )
