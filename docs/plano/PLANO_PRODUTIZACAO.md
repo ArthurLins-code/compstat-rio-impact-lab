@@ -86,7 +86,7 @@ PSW = pessoa-semana.
 
 ## Fase 2 — Persistência + workflow do Plano de Ação
 
-**Spec:** [`specs/fase2-persistencia.md`](specs/fase2-persistencia.md) *(a escrever no início da fase)*
+**Spec:** [`specs/fase2-persistencia.md`](specs/fase2-persistencia.md)
 
 **Escopo aprovado:**
 - **SQLite + SQLAlchemy** como banco (zero burocracia, fácil migrar para
