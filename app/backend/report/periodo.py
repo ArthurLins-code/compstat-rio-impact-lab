@@ -152,6 +152,13 @@ def janela_anterior(j: Janela) -> Optional[Janela]:
     )
 
 
+def variacao_pct(atual: int, anterior: int) -> Optional[float]:
+    """Variação % entre dois totais. None quando o denominador é 0 (evita ∞)."""
+    if anterior <= 0:
+        return None
+    return round((atual - anterior) / anterior * 100, 1)
+
+
 def filtro_sql(j: Janela, alias: str = "") -> Tuple[str, list]:
     """SQL fragment + params para filtrar uma tabela `(ano, mes)` pela janela.
 

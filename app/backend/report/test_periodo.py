@@ -69,6 +69,32 @@ def test_resolver_rejeita_preset_desconhecido():
         P.resolver("ultimos_42d")
 
 
+# ---------------------------------------------------------------------------
+# Variação % (Tarefa 1.2)
+# ---------------------------------------------------------------------------
+
+
+def test_variacao_pct_aumento():
+    assert P.variacao_pct(150, 100) == 50.0
+
+
+def test_variacao_pct_queda():
+    assert P.variacao_pct(80, 100) == -20.0
+
+
+def test_variacao_pct_estavel():
+    assert P.variacao_pct(100, 100) == 0.0
+
+
+def test_variacao_pct_anterior_zerado_devolve_none():
+    assert P.variacao_pct(10, 0) is None
+
+
+def test_variacao_pct_arredondado_para_uma_casa():
+    # 47/333 = 14.114114... -> 14.1
+    assert P.variacao_pct(380, 333) == 14.1
+
+
 # Integração: depende dos CSVs silver, marcado como `integration` e pulado no CI.
 @pytest.mark.integration
 def test_resolver_default_devolve_janela_concreta():

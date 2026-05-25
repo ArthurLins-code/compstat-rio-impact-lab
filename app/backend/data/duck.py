@@ -15,7 +15,7 @@ import os
 from typing import Any, Callable, Dict, List, Optional
 
 from .. import config, deps
-from ..report.periodo import Janela, filtro_sql
+from ..report.periodo import Janela, filtro_sql, janela_anterior, variacao_pct
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -172,23 +172,31 @@ def indicadores(area_id: int, janela: Optional[Janela] = None) -> dict:
     """Indicadores do período. Os dados só têm roubo (sem furto).
 
     `janela=None` ou `janela.aberta` mantém o comportamento legado (todo o
-    histórico, vindo do `area_brief`). Janela definida recalcula `roubos`/
-    `total` a partir do silver filtrado.
+    histórico, vindo do `area_brief`, `variacaoPct=None`). Com janela definida
+    `roubos`/`total` saem do silver filtrado e `variacaoPct` compara com a
+    janela imediatamente anterior, de mesmo comprimento.
     """
     brief = area_brief_row(area_id)
     ranking = int(brief.get("ranking_ocorrencias") or 0)
 
     if janela is None or janela.aberta:
         total = int(brief.get("total_ocorrencias") or 0)
+        variacao: Optional[float] = None
     else:
         total = _total_ocorrencias_janela(area_id, janela)
+        anterior = janela_anterior(janela)
+        variacao = (
+            variacao_pct(total, _total_ocorrencias_janela(area_id, anterior))
+            if anterior is not None
+            else None
+        )
 
     return {
         "roubos": total,
         "furtos": None,
         "total": total,
         "rankingEntreAreas": ranking,
-        "variacaoPct": None,
+        "variacaoPct": variacao,
     }
 
 
