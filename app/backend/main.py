@@ -8,13 +8,40 @@ Rodar (a partir da raiz do repo):
 """
 from __future__ import annotations
 
+import logging
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from . import config
+from .middleware.logging import RequestLoggingMiddleware
 from .routers import acoes, ai, areas, copilot, export, match, report
 
+
+def _validar_cors_em_producao(origins):
+    """`"*"` em CORS_ORIGINS é incompatível com PERSISTENT_STATE (sem login).
+
+    Sem login, qualquer origem alcançar o backend significa qualquer página
+    web poder editar o relatório. Quando o flag está ligado, exigimos lista
+    explícita de origens.
+    """
+    if config.PERSISTENT_STATE and ("*" in origins or any(o.strip() == "*" for o in origins)):
+        raise RuntimeError(
+            "CORS_ORIGINS='*' não é permitido com COMPSTAT_PERSISTENT_STATE=1 "
+            "(sem login). Defina os domínios explícitos do app."
+        )
+
+
+_validar_cors_em_producao(config.CORS_ORIGINS)
+
+
+# Logger raiz: handler simples em stdout. Quem subir em produção redireciona
+# `compstat.req` para o coletor (Loki/CloudWatch/etc.).
+logging.basicConfig(level=logging.INFO, format="%(message)s")
+
 app = FastAPI(title="CompStat Rio — Backend", version="0.1.0")
+
+app.add_middleware(RequestLoggingMiddleware)
 
 app.add_middleware(
     CORSMiddleware,
@@ -22,6 +49,7 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["X-Request-ID"],
 )
 
 app.include_router(areas.router, prefix="/api")
