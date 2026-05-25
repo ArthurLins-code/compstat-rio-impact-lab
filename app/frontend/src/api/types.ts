@@ -122,6 +122,23 @@ export type CopilotEvent =
   | { type: 'error'; message: string }
   | { type: 'done' };
 
+// ---- Health/frescor (Fase 5 / Tarefa 5.2) ----
+export type StatusFrescor = 'verde' | 'ambar' | 'vermelho'
+
+export interface DatasetFrescor {
+  nome: string
+  idadeHoras: number | null
+  slaHoras: number
+  status: StatusFrescor
+  presente: boolean
+}
+
+export interface HealthData {
+  datasets: DatasetFrescor[]
+  statusGeral: StatusFrescor
+  computadoEm: string
+}
+
 // Áreas FM (id -> nome curto), para o seletor
 export const AREAS_FM: Record<number, string> = {
   2: 'Rodoviária / Terminal Gentileza',

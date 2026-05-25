@@ -10,7 +10,15 @@ import {
   fixtureTemporal,
 } from './fixtures'
 import type { MapPackage } from './mapTypes'
-import type { AiBlock, AreaInfo, AreaResumo, MatchResult, Relatorio, TemporalMatrix } from './types'
+import type {
+  AiBlock,
+  AreaInfo,
+  AreaResumo,
+  HealthData,
+  MatchResult,
+  Relatorio,
+  TemporalMatrix,
+} from './types'
 
 /** Tenta o backend; em qualquer falha (ou modo fixtures) devolve o fallback. */
 async function withFallback<T>(real: () => Promise<T>, fallback: () => T): Promise<T> {
@@ -94,4 +102,17 @@ export function patchSection(id: number, secao: string, payload: unknown): Promi
 
 export function exportDocxUrl(id: number): string {
   return apiUrl(`/report/${id}/export.docx`)
+}
+
+/** Frescor dos datasets críticos (Tarefa 5.2). Fallback verde quando o
+ *  backend não está disponível — não deve assustar o gestor em modo demo. */
+export function fetchHealthData(): Promise<HealthData> {
+  return withFallback(
+    () => apiGet<HealthData>('/health/data'),
+    () => ({
+      datasets: [],
+      statusGeral: 'verde' as const,
+      computadoEm: new Date().toISOString(),
+    }),
+  )
 }

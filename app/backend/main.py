@@ -100,3 +100,14 @@ def health():
         "has_api_key": config.has_api_key(),
         "persistent_state": config.PERSISTENT_STATE,
     }
+
+
+@app.get("/api/health/data")
+def health_data():
+    """Frescor dos datasets críticos (Tarefa 5.2).
+
+    Reusa `jobs.tarefas.relatorio_frescor`. Não bloqueia ninguém —
+    sinaliza se 1746/gold/silver estão dentro do SLA.
+    """
+    from .jobs.tarefas import relatorio_frescor
+    return relatorio_frescor()

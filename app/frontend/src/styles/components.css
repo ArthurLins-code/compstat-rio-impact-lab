@@ -405,6 +405,43 @@
   background: var(--surface-sunken);
   color: var(--text-muted);
 }
+
+/* --------------------- Health badge (Tarefa 5.2) ---------------------- */
+.home__cta {
+  margin-left: auto;
+}
+.health-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-3);
+  border-radius: 999px;
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  border: 1px solid color-mix(in oklch, currentColor 22%, transparent);
+}
+.health-badge__icon {
+  display: inline-flex;
+  width: 0.95rem;
+  height: 0.95rem;
+}
+.health-badge__icon svg {
+  width: 100%;
+  height: 100%;
+}
+.health-badge--verde {
+  background: var(--ok-soft);
+  color: var(--ok-text);
+}
+.health-badge--ambar {
+  background: var(--warn-soft);
+  color: var(--warn-text);
+}
+.health-badge--vermelho {
+  background: var(--sev-high-soft);
+  color: var(--sev-high-text);
+}
 .report__sections {
   display: flex;
   flex-direction: column;

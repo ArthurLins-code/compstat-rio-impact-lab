@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import { fetchAreasOverview } from '../../api/reports'
 import { t } from '../../i18n'
 import { AreaCard } from './AreaCard'
+import { HealthBadge } from './HealthBadge'
 
 export function HomePage({ onSelectArea, onOpenPredictive }: { onSelectArea: (id: number) => void; onOpenPredictive: () => void }) {
   const { data, isLoading } = useQuery({
@@ -27,7 +28,8 @@ export function HomePage({ onSelectArea, onOpenPredictive }: { onSelectArea: (id
           <strong>{t('home.brand')}</strong>
           <span className="home__brand-sub">{t('home.brand-sub')}</span>
         </div>
-        <button type="button" className="btn btn--primary" style={{ marginLeft: 'auto' }} onClick={onOpenPredictive}>
+        <HealthBadge />
+        <button type="button" className="btn btn--primary home__cta" onClick={onOpenPredictive}>
           {t('home.cta-preditivo')}
         </button>
       </header>
