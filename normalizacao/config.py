@@ -1,7 +1,13 @@
 """Constantes e caminhos da camada de normalização CompStat Rio."""
+import os
 from pathlib import Path
 
-BASE = Path("/Users/pedrorezende/SegurancaPublica/claude_impact_lab_compstat_rio")
+# Raiz do repositório: um nível acima deste arquivo (normalizacao/config.py).
+# Override possível via COMPSTAT_DATA_ROOT (ex.: container montando volume).
+BASE = Path(
+    os.environ.get("COMPSTAT_DATA_ROOT")
+    or Path(__file__).resolve().parents[1]
+)
 DADOS = BASE / "dados"
 OUT = BASE / "dados_normalizados"
 OUT_SILVER = OUT / "silver"
