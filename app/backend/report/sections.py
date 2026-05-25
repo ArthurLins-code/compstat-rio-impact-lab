@@ -7,10 +7,11 @@ de IA os preenche depois.
 """
 from __future__ import annotations
 
-from typing import List
+from typing import List, Optional
 
 from ..data import duck as D
 from . import models as M
+from .periodo import Janela
 
 # ---------------------------------------------------------------------------
 # Perguntas norteadoras (resumo executivo)
@@ -84,9 +85,9 @@ def sec_identificacao(area_id: int) -> M.Identificacao:
 # ---------------------------------------------------------------------------
 
 
-def sec_ocorrencias(area_id: int) -> M.Ocorrencias:
-    ind = D.indicadores(area_id)
-    dist = D.distribuicao_tipo(area_id)
+def sec_ocorrencias(area_id: int, janela: Optional[Janela] = None) -> M.Ocorrencias:
+    ind = D.indicadores(area_id, janela)
+    dist = D.distribuicao_tipo(area_id, janela)
     indicadores = M.IndicadoresPeriodo(
         roubos=ind["roubos"],
         furtos=ind["furtos"],
@@ -183,8 +184,8 @@ def sec_cameras(area_id: int) -> M.Cameras:
 # ---------------------------------------------------------------------------
 
 
-def sec_temporal(area_id: int) -> M.TemporalMatrix:
-    mt = D.matriz_temporal(area_id)
+def sec_temporal(area_id: int, janela: Optional[Janela] = None) -> M.TemporalMatrix:
+    mt = D.matriz_temporal(area_id, janela)
     return M.TemporalMatrix(
         matrix=mt["matrix"],
         dias=mt["dias"],

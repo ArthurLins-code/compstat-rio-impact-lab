@@ -15,6 +15,7 @@ import os
 from typing import Any, Callable, Dict, List, Optional
 
 from .. import config, deps
+from ..report.periodo import Janela, filtro_sql
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -156,11 +157,32 @@ def identificacao(area_id: int) -> dict:
     return {"nome_area": nome_area, "faccoes": faccoes, "bairros": bairros}
 
 
-def indicadores(area_id: int) -> dict:
-    """Indicadores do período. Os dados só têm roubo (sem furto, sem período anterior)."""
+def _total_ocorrencias_janela(area_id: int, janela: Janela) -> int:
+    """Conta ocorrências da área dentro da janela (ano, mês). 0 se janela vazia."""
+    where_periodo, params_periodo = filtro_sql(janela)
+    row = deps.query_one(
+        "SELECT COUNT(*) AS n FROM %s WHERE area_fm_id = ?%s"
+        % (_silver("fact_ocorrencias.csv"), where_periodo),
+        [area_id, *params_periodo],
+    )
+    return int(row["n"]) if row and row.get("n") is not None else 0
+
+
+def indicadores(area_id: int, janela: Optional[Janela] = None) -> dict:
+    """Indicadores do período. Os dados só têm roubo (sem furto).
+
+    `janela=None` ou `janela.aberta` mantém o comportamento legado (todo o
+    histórico, vindo do `area_brief`). Janela definida recalcula `roubos`/
+    `total` a partir do silver filtrado.
+    """
     brief = area_brief_row(area_id)
-    total = int(brief.get("total_ocorrencias") or 0)
     ranking = int(brief.get("ranking_ocorrencias") or 0)
+
+    if janela is None or janela.aberta:
+        total = int(brief.get("total_ocorrencias") or 0)
+    else:
+        total = _total_ocorrencias_janela(area_id, janela)
+
     return {
         "roubos": total,
         "furtos": None,
@@ -170,13 +192,29 @@ def indicadores(area_id: int) -> dict:
     }
 
 
-def distribuicao_tipo(area_id: int) -> List[dict]:
-    """Ocorrências por tipo, ordenadas (rank 1 = maior)."""
-    rows = deps.query(
-        "SELECT category, qtd FROM %s WHERE area_fm_id = ? "
-        "ORDER BY qtd DESC" % _gold("gold_ocorrencias_tipo.csv"),
-        [area_id],
-    )
+def distribuicao_tipo(
+    area_id: int, janela: Optional[Janela] = None
+) -> List[dict]:
+    """Ocorrências por tipo, ordenadas (rank 1 = maior).
+
+    Sem janela usa o agregado gold (rápido). Com janela recompõe a partir
+    de `fact_ocorrencias` filtrado por (ano, mês).
+    """
+    if janela is None or janela.aberta:
+        rows = deps.query(
+            "SELECT category, qtd FROM %s WHERE area_fm_id = ? "
+            "ORDER BY qtd DESC" % _gold("gold_ocorrencias_tipo.csv"),
+            [area_id],
+        )
+    else:
+        where_periodo, params_periodo = filtro_sql(janela)
+        rows = deps.query(
+            "SELECT category, COUNT(*) AS qtd FROM %s "
+            "WHERE area_fm_id = ?%s "
+            "GROUP BY category ORDER BY qtd DESC"
+            % (_silver("fact_ocorrencias.csv"), where_periodo),
+            [area_id, *params_periodo],
+        )
     return [
         {"tipo": r["category"], "qtd": int(r["qtd"]), "rank": i + 1}
         for i, r in enumerate(rows)
@@ -188,17 +226,31 @@ def distribuicao_tipo(area_id: int) -> List[dict]:
 # ---------------------------------------------------------------------------
 
 
-def matriz_temporal(area_id: int) -> dict:
-    """Matriz 7x24 (dias na ordem WEEKDAY_PT) + dia/hora críticos e cobertura."""
+def matriz_temporal(area_id: int, janela: Optional[Janela] = None) -> dict:
+    """Matriz 7x24 (dias na ordem WEEKDAY_PT) + dia/hora críticos e cobertura.
+
+    Sem janela usa o agregado gold (rápido). Com janela reagrega a partir
+    do silver filtrado por (ano, mês).
+    """
     dias = list(config.WEEKDAY_PT)
     dia_idx = {d: i for i, d in enumerate(dias)}
     matrix = [[0 for _ in range(24)] for _ in range(7)]
 
-    rows = deps.query(
-        "SELECT dia_semana, hora, qtd FROM %s WHERE area_fm_id = ?"
-        % _gold("gold_temporal.csv"),
-        [area_id],
-    )
+    if janela is None or janela.aberta:
+        rows = deps.query(
+            "SELECT dia_semana, hora, qtd FROM %s WHERE area_fm_id = ?"
+            % _gold("gold_temporal.csv"),
+            [area_id],
+        )
+    else:
+        where_periodo, params_periodo = filtro_sql(janela)
+        rows = deps.query(
+            "SELECT dia_semana, hora, COUNT(*) AS qtd FROM %s "
+            "WHERE area_fm_id = ?%s "
+            "GROUP BY dia_semana, hora"
+            % (_silver("fact_ocorrencias.csv"), where_periodo),
+            [area_id, *params_periodo],
+        )
     for r in rows:
         d = r["dia_semana"]
         h = r["hora"]
@@ -234,12 +286,15 @@ def matriz_temporal(area_id: int) -> dict:
         else:
             periodo = "Madrugada"
 
-    # cobertura: total de registros (fact_ocorrencias) e quantos sem hora
+    # cobertura: total de registros (fact_ocorrencias) e quantos sem hora,
+    # respeitando a mesma janela usada na matriz acima.
+    where_cov, params_cov = filtro_sql(janela) if janela is not None else ("", [])
     cov = deps.query_one(
         "SELECT COUNT(*) AS total, "
         "COUNT(*) FILTER (WHERE hora IS NULL) AS sem_hora "
-        "FROM %s WHERE area_fm_id = ?" % _silver("fact_ocorrencias.csv"),
-        [area_id],
+        "FROM %s WHERE area_fm_id = ?%s"
+        % (_silver("fact_ocorrencias.csv"), where_cov),
+        [area_id, *params_cov],
     ) or {"total": 0, "sem_hora": 0}
 
     return {

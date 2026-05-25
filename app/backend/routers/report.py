@@ -9,10 +9,11 @@ from __future__ import annotations
 
 from typing import Any, Dict
 
-from fastapi import APIRouter, Body, HTTPException
+from fastapi import APIRouter, Body, HTTPException, Query
 
 from ..match.engine import compute_match
 from ..report import models as M
+from ..report import periodo as P
 from ..report import sections as S
 from ..report.assembler import aplicar_edicao, get_relatorio
 
@@ -20,13 +21,29 @@ router = APIRouter()
 
 
 @router.get("/report/{area_id}", response_model=M.Relatorio)
-def get_report(area_id: int) -> M.Relatorio:
-    return get_relatorio(area_id)
+def get_report(
+    area_id: int,
+    periodo: str = Query(
+        P.PRESET_DEFAULT,
+        description="Recorte temporal. Presets: %s." % ", ".join(P.PRESETS),
+    ),
+) -> M.Relatorio:
+    try:
+        return get_relatorio(area_id, preset_periodo=periodo)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 @router.get("/report/{area_id}/temporal", response_model=M.TemporalMatrix)
-def get_report_temporal(area_id: int) -> M.TemporalMatrix:
-    return S.sec_temporal(area_id)
+def get_report_temporal(
+    area_id: int,
+    periodo: str = Query(P.PRESET_DEFAULT),
+) -> M.TemporalMatrix:
+    try:
+        _, janela = P.resolver(periodo)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    return S.sec_temporal(area_id, janela)
 
 
 @router.get("/report/{area_id}/coincidencias", response_model=M.MatchResult)

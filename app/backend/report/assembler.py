@@ -6,17 +6,15 @@
 """
 from __future__ import annotations
 
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from ..match.engine import compute_match
 from . import models as M
+from . import periodo as P
 from . import sections as S
 
 # Estado de edição humana: REPORT_STATE[area_id][secao] = payload (dict).
 REPORT_STATE: Dict[int, Dict[str, Any]] = {}
-
-PERIODO_DE = "2023-01"
-PERIODO_ATE = "2024-12"
 
 # Seções aceitas em PATCH (mapeadas para o campo do Relatorio).
 SECOES_EDITAVEIS = {
@@ -32,7 +30,15 @@ SECOES_EDITAVEIS = {
 }
 
 
-def montar_relatorio(area_id: int) -> M.Relatorio:
+def montar_relatorio(area_id: int, preset_periodo: Optional[str] = None) -> M.Relatorio:
+    """Monta o relatório para a área, recortando indicadores por `preset_periodo`.
+
+    Presets aceitos: ver `periodo.PRESETS`. `None` usa `periodo.PRESET_DEFAULT`.
+    `ValueError` para preset desconhecido (router converte em HTTP 400).
+    """
+    _, janela = P.resolver(preset_periodo)
+    de, ate = janela.como_periodo()
+
     ident = S.sec_identificacao(area_id)
     match = compute_match(area_id)
     # nº de segmentos críticos na identificação
@@ -41,11 +47,11 @@ def montar_relatorio(area_id: int) -> M.Relatorio:
     return M.Relatorio(
         areaId=area_id,
         nomeArea=ident.nomeArea,
-        periodo=M.Periodo(de=PERIODO_DE, ate=PERIODO_ATE),
+        periodo=M.Periodo(de=de, ate=ate),
         rascunho=True,
         identificacao=ident,
         resumoExecutivo=S.sec_resumo_executivo(area_id),
-        ocorrencias=S.sec_ocorrencias(area_id),
+        ocorrencias=S.sec_ocorrencias(area_id, janela),
         temporalResumo=S.sec_temporal_resumo(area_id),
         dinamicaCriminal=S.sec_dinamica_criminal(area_id),
         efetivoFM=S.sec_efetivo_fm(area_id),
@@ -81,9 +87,9 @@ def aplicar_edicao(area_id: int, secao: str, payload: dict) -> None:
     REPORT_STATE.setdefault(area_id, {})[secao] = payload
 
 
-def get_relatorio(area_id: int) -> M.Relatorio:
+def get_relatorio(area_id: int, preset_periodo: Optional[str] = None) -> M.Relatorio:
     """Monta o relatório e aplica os overrides de edição humana, se houver."""
-    rel = montar_relatorio(area_id)
+    rel = montar_relatorio(area_id, preset_periodo=preset_periodo)
     overrides = REPORT_STATE.get(area_id, {})
     if not overrides:
         return rel
