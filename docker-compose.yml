@@ -1,0 +1,44 @@
+# Orquestração CompStat Rio (Fase 0 — sem Postgres; persistência vem na Fase 2).
+#
+# Subir tudo:
+#   docker compose up --build
+#
+# Acessar:
+#   Frontend ............... http://localhost:5173
+#   Backend (api direta) ... http://localhost:8010/api/health
+#
+# Pré-requisito: arquivo .env na raiz com ANTHROPIC_API_KEY=...
+# (sem a chave o backend sobe igual, copiloto retorna mensagem amigável).
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: compstat-backend
+    ports:
+      - "8010:8010"
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      # Origin do frontend nginx (porta 5173 publicada abaixo).
+      CORS_ORIGINS: "http://localhost:5173"
+    volumes:
+      # Dados ficam fora da imagem — atualização sem rebuild.
+      # O backend live só lê dados_normalizados/; relints/ e sh_area_forca/
+      # são consumidos pela pipeline offline (normalizacao/run_*.py) e não
+      # precisam estar no runtime.
+      - ./dados_normalizados:/app/dados_normalizados:ro
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./app/frontend
+      dockerfile: Dockerfile
+    container_name: compstat-frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+    restart: unless-stopped

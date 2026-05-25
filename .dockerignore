@@ -1,0 +1,38 @@
+# Mantém o contexto de build pequeno.
+
+# Controle de versão
+.git
+.gitignore
+
+# Python local
+.venv
+__pycache__
+*.pyc
+*.pyo
+.pytest_cache
+.ruff_cache
+
+# Node local
+**/node_modules
+**/dist
+**/.vite
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Mídia do hackathon (pesada; não precisa estar no container)
+docs/midia/
+
+# Dados brutos só são necessários para rodar a pipeline de normalização
+# manualmente; o app lê de dados_normalizados/ (montado via volume).
+dados/
+relints/
+
+# Segredos
+.env
+.env.local
+*.key
+
+# Docs (a app não consome — mantém o build leve)
+docs/
