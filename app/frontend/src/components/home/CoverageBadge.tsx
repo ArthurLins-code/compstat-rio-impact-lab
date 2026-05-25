@@ -4,6 +4,7 @@
 //   parcial      — falta ≥1 sinal (UI informa o que falta no title)
 //   indisponíveis — sem ocorrências; relatório terá pouco a dizer
 import type { AreaResumo } from '../../api/types'
+import { t } from '../../i18n'
 
 export type Cobertura = 'completos' | 'parcial' | 'indisponiveis'
 
@@ -14,20 +15,23 @@ interface SinalAusente {
 
 function avaliar(a: AreaResumo): { nivel: Cobertura; ausentes: SinalAusente[] } {
   if (!a.totalOcorrencias) {
-    return { nivel: 'indisponiveis', ausentes: [{ campo: 'totalOcorrencias', rotulo: 'ocorrências' }] }
+    return {
+      nivel: 'indisponiveis',
+      ausentes: [{ campo: 'totalOcorrencias', rotulo: t('cobertura.sinal-ocorrencias') }],
+    }
   }
   const ausentes: SinalAusente[] = []
-  if (!a.picoDiaSemana) ausentes.push({ campo: 'picoDiaSemana', rotulo: 'dia de pico' })
-  if (a.picoHora == null) ausentes.push({ campo: 'picoHora', rotulo: 'hora de pico' })
-  if (!a.principalFator) ausentes.push({ campo: 'principalFator', rotulo: 'fator urbano' })
-  if (!a.nDisque) ausentes.push({ campo: 'nDisque', rotulo: 'denúncias' })
+  if (!a.picoDiaSemana) ausentes.push({ campo: 'picoDiaSemana', rotulo: t('cobertura.sinal-pico-dia') })
+  if (a.picoHora == null) ausentes.push({ campo: 'picoHora', rotulo: t('cobertura.sinal-pico-hora') })
+  if (!a.principalFator) ausentes.push({ campo: 'principalFator', rotulo: t('cobertura.sinal-fator') })
+  if (!a.nDisque) ausentes.push({ campo: 'nDisque', rotulo: t('cobertura.sinal-denuncias') })
   return { nivel: ausentes.length ? 'parcial' : 'completos', ausentes }
 }
 
-const ROTULOS: Record<Cobertura, string> = {
-  completos: 'Dados completos',
-  parcial: 'Dados parciais',
-  indisponiveis: 'Sem dados',
+const ROTULO_POR_NIVEL: Record<Cobertura, string> = {
+  completos: t('cobertura.completos'),
+  parcial: t('cobertura.parcial'),
+  indisponiveis: t('cobertura.indisponiveis'),
 }
 
 function Icone({ nivel }: { nivel: Cobertura }) {
@@ -58,12 +62,13 @@ function Icone({ nivel }: { nivel: Cobertura }) {
 export function CoverageBadge({ area }: { area: AreaResumo }) {
   const { nivel, ausentes } = avaliar(area)
   const titulo = ausentes.length
-    ? `Faltam: ${ausentes.map((a) => a.rotulo).join(', ')}`
-    : 'Todos os sinais relevantes presentes'
+    ? t('cobertura.parcial-detalhe', { sinais: ausentes.map((a) => a.rotulo).join(', ') })
+    : t('cobertura.completos-detalhe')
+  const rotulo = ROTULO_POR_NIVEL[nivel]
   return (
-    <span className={`cov cov--${nivel}`} title={titulo} aria-label={`${ROTULOS[nivel]}. ${titulo}`}>
+    <span className={`cov cov--${nivel}`} title={titulo} aria-label={`${rotulo}. ${titulo}`}>
       <Icone nivel={nivel} />
-      {ROTULOS[nivel]}
+      {rotulo}
     </span>
   )
 }

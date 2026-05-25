@@ -2,6 +2,7 @@
 // por urgência (volume de ocorrências). Clicar num card abre o relatório.
 import { useQuery } from '@tanstack/react-query'
 import { fetchAreasOverview } from '../../api/reports'
+import { t } from '../../i18n'
 import { AreaCard } from './AreaCard'
 
 export function HomePage({ onSelectArea, onOpenPredictive }: { onSelectArea: (id: number) => void; onOpenPredictive: () => void }) {
@@ -23,22 +24,19 @@ export function HomePage({ onSelectArea, onOpenPredictive }: { onSelectArea: (id
           </svg>
         </span>
         <div className="home__brand">
-          <strong>CompStat Rio</strong>
-          <span className="home__brand-sub">Inteligência de Segurança Pública</span>
+          <strong>{t('home.brand')}</strong>
+          <span className="home__brand-sub">{t('home.brand-sub')}</span>
         </div>
         <button type="button" className="btn btn--primary" style={{ marginLeft: 'auto' }} onClick={onOpenPredictive}>
-          Mapa Preditivo de Risco
+          {t('home.cta-preditivo')}
         </button>
       </header>
 
       <main className="home__body">
         <div className="home__intro">
-          <span className="home__eyebrow">Força Municipal · Panorama operacional</span>
-          <h1 className="home__title">Áreas priorizadas por urgência</h1>
-          <p className="home__subtitle">
-            As {areas.length || 8} áreas da Força Municipal, ordenadas pelo volume de ocorrências
-            de roubo e furto no período. Selecione uma área para abrir o relatório analítico completo.
-          </p>
+          <span className="home__eyebrow">{t('home.eyebrow')}</span>
+          <h1 className="home__title">{t('home.titulo')}</h1>
+          <p className="home__subtitle">{t('home.subtitulo', { n: areas.length || 8 })}</p>
         </div>
 
         {isLoading ? (
