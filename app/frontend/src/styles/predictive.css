@@ -3,6 +3,55 @@
   colidir com o CSS global. Usa apenas os design tokens já definidos em tokens.css.
 */
 
+/* ---------------------- Toggle de modo (Oficial vs Ao vivo) -------------- */
+.pred-mode {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  background: var(--surface-sunken);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  margin-left: var(--sp-3);
+}
+.pred-mode__btn {
+  padding: var(--sp-2) var(--sp-3);
+  background: transparent;
+  border: 0;
+  border-radius: 4px;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+.pred-mode__btn[aria-pressed='true'] {
+  background: var(--surface-panel);
+  color: var(--primary);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ----------------------- Modo Ao vivo (MapLibre) ------------------------ */
+.pred-live {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--map-paper);
+}
+.pred-live__map {
+  flex: 1;
+  min-height: 360px;
+}
+.pred-live__status {
+  flex: none;
+  padding: var(--sp-3) var(--sp-4);
+  font-size: var(--fs-sm);
+  color: var(--text-body);
+  background: var(--surface-rail);
+  border-top: 1px solid var(--border);
+}
+
 /* ---------------------------------------------------------------- Página */
 .pred-page {
   display: flex;

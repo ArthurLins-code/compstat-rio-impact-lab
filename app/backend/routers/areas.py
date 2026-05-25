@@ -67,6 +67,39 @@ def status_job(job_id: str):
     return j
 
 
+@router.get("/areas/{area_id}/predictive")
+def get_area_predictive(area_id: int) -> Dict[str, Any]:
+    """Dados preditivos "ao vivo" para o Mapa Preditivo (Tarefa 4.3).
+
+    Reusa `compute_match`: cada coincidência espacial vira um "hexágono"
+    com score normalizado (0-1), nº de ocorrências e camadas. H3 real
+    fica como follow-up; aqui usamos pontos com score, suficiente para o
+    overlay do mapa.
+    """
+    match = compute_match(area_id)
+    if match is None or not match.coincidencias:
+        return {"areaId": area_id, "scoreArea": 0.0, "hexagonos": []}
+
+    score_max = max((c.score for c in match.coincidencias), default=10.0) or 10.0
+    hexagonos = [
+        {
+            "lat": c.lat,
+            "lon": c.lon,
+            "score": round(c.score / score_max, 3),
+            "scoreBruto": round(c.score, 3),
+            "nOcorrencias": c.nOcorrencias,
+            "camadas": c.camadas,
+            "justificativa": c.justificativa,
+        }
+        for c in match.coincidencias
+    ]
+    return {
+        "areaId": area_id,
+        "scoreArea": round((match.scoreArea or 0.0) / 10.0, 3),
+        "hexagonos": hexagonos,
+    }
+
+
 @router.get("/areas/{area_id}/map")
 def get_area_map(area_id: int) -> Dict[str, Any]:
     # Ocorrências (pontos).
