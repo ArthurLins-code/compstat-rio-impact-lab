@@ -426,7 +426,13 @@ def dinamica_estruturada(area_id: int) -> Optional[List[dict]]:
 
 
 def disque_amostra(area_id: int, limite: int = 25) -> List[dict]:
-    """Temas das denúncias agregados por categoria. NÃO expõe texto cru (PII)."""
+    """Temas das denúncias agregados por categoria. NÃO expõe texto cru (PII).
+
+    A agregação por `category` já elimina texto livre; ainda assim passa
+    pela camada de redação de PII (Tarefa 3.4) como defesa em profundidade.
+    """
+    from ..ai import pii as _PII
+
     rows = deps.query(
         "SELECT category AS tema, COUNT(*) AS qtd FROM %s WHERE area_fm_id = ? "
         "GROUP BY category ORDER BY qtd DESC LIMIT ?"
@@ -434,7 +440,11 @@ def disque_amostra(area_id: int, limite: int = 25) -> List[dict]:
         [area_id, limite],
     )
     return [
-        {"tema": r["tema"], "category": r["tema"], "qtd": int(r["qtd"] or 0)}
+        {
+            "tema": _PII.redact(r["tema"] or ""),
+            "category": _PII.redact(r["tema"] or ""),
+            "qtd": int(r["qtd"] or 0),
+        }
         for r in rows
     ]
 
