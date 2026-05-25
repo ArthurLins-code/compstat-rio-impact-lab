@@ -140,6 +140,40 @@ SYS_COPILOTO = (
 
 # --------------------------------------------------------------------------- perguntas norteadoras
 # Texto canônico das 4 perguntas norteadoras do resumo executivo (briefing §7).
+# --------------------------------------------------------------------------- registry-backed lookup
+# Mapa de nome canônico -> constante de Python correspondente (fallback offline).
+_CONSTANTES = {
+    "copiloto": SYS_COPILOTO,
+    "sec_resumo_executivo": SYS_RESUMO_EXECUTIVO,
+    "sec_dinamica_criminal": SYS_DINAMICA_CRIMINAL,
+    "sec_efetivo_fm": SYS_EFETIVO_FM,
+    "sec_plano_acao": SYS_PLANO_ACAO,
+}
+
+
+def get(nome: str) -> tuple:
+    """Devolve `(versao, conteudo)` do prompt nomeado.
+
+    Quando PERSISTENT_STATE está ligado, consulta o registry SQL (versão
+    ativa). Sem o flag ou sem entrada no registry, devolve a constante
+    do módulo com versão 0 (sinaliza "não-registrado, in-code default").
+    """
+    constante = _CONSTANTES.get(nome)
+    if constante is None:
+        raise KeyError("Prompt %r não está no catálogo." % nome)
+
+    try:
+        from .. import config
+        if config.PERSISTENT_STATE:
+            from ..db import prompts as _PR
+            ativo = _PR.obter_ativo(nome)
+            if ativo is not None:
+                return ativo  # (versao, conteudo)
+    except Exception:  # pragma: no cover - registry nunca pode bloquear o app
+        pass
+    return (0, constante)
+
+
 PERGUNTAS_NORTEADORAS = [
     {
         "id": "q1",

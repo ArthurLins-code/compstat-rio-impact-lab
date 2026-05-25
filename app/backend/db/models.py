@@ -141,6 +141,30 @@ class RelatorioVersao(Base):
 # ---------------------------------------------------------------------------
 
 
+class Prompt(Base):
+    """Versão de um prompt nomeado (Tarefa 3.2).
+
+    Cada nome ('copiloto', 'sec_resumo_executivo', ...) tem N versões
+    monotônicas. Apenas uma `ativo=1` por nome — quem promove desativa as
+    anteriores. Nunca apaga: histórico é o que destrava A/B retroativo.
+    """
+
+    __tablename__ = "prompts"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    nome: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+    versao: Mapped[int] = mapped_column(Integer, nullable=False)
+    conteudo: Mapped[str] = mapped_column(String, nullable=False)
+    ativo: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+    criado_em: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=_now, nullable=False
+    )
+
+    __table_args__ = (
+        UniqueConstraint("nome", "versao", name="uq_prompts_nome_versao"),
+    )
+
+
 class CopilotEvento(Base):
     """Trilha de auditoria de uma interação com o copiloto.
 
