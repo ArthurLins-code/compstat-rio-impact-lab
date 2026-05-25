@@ -62,7 +62,7 @@ PSW = pessoa-semana.
 
 ## Fase 1 — Cobertura de dados aceitável
 
-**Spec:** [`specs/fase1-cobertura-dados.md`](specs/fase1-cobertura-dados.md) *(a escrever no início da fase)*
+**Spec:** [`specs/fase1-cobertura-dados.md`](specs/fase1-cobertura-dados.md)
 
 **Escopo aprovado pelo usuário (2026-05-25):**
 1. **Período relativo configurável** em `assembler.py` (presets "últimos 30/90/180
