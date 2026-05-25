@@ -7,9 +7,10 @@ from __future__ import annotations
 
 from typing import Any, Dict, List
 
-from fastapi import APIRouter
+from fastapi import APIRouter, BackgroundTasks
 
 from .. import deps
+from ..ai import jobs as J
 from ..data import duck as D
 from ..data import geojson as G
 from ..match.engine import compute_match
@@ -35,6 +36,35 @@ def get_areas() -> List[M.AreaInfo]:
 def get_areas_overview() -> List[M.AreaResumo]:
     """Resumo das áreas FM (ordenado por urgência) para a página inicial."""
     return [M.AreaResumo(**a) for a in D.resumo_areas()]
+
+
+@router.post("/areas/{area_id}/reprocessar-dinamica", status_code=202)
+def reprocessar_dinamica(area_id: int, bg: BackgroundTasks) -> Dict[str, Any]:
+    """Agenda re-extração da dinâmica criminal da área (Tarefa 3.6).
+
+    Devolve 202 imediato com `job_id` + `estimativa_custo_usd` calculada a
+    partir do nº de RELINTs e do custo médio histórico do prompt de
+    extração. Estado do job sobrevive na RAM do processo até a Fase 5
+    trazer um orquestrador (Celery/Prefect).
+    """
+    job = J.criar_job("reprocessar_dinamica", area_id)
+    bg.add_task(J.rodar_reprocessar_dinamica, job.job_id)
+    return {
+        "jobId": job.job_id,
+        "status": "agendado",
+        "estimativaCustoUsd": job.estimativa_custo_usd,
+        "consultarStatusEm": "/api/jobs/%s" % job.job_id,
+    }
+
+
+@router.get("/jobs/{job_id}")
+def status_job(job_id: str):
+    """Estado de um job assíncrono (reprocessar-dinamica, etc.)."""
+    from fastapi import HTTPException
+    j = J.obter(job_id)
+    if j is None:
+        raise HTTPException(status_code=404, detail="Job não encontrado.")
+    return j
 
 
 @router.get("/areas/{area_id}/map")
