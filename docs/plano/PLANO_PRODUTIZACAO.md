@@ -118,6 +118,8 @@ PSW = pessoa-semana.
 
 ## Fase 3 — IA auditável
 
+**Spec:** [`specs/fase3-ia-auditavel.md`](specs/fase3-ia-auditavel.md)
+
 **Escopo:**
 - Trilha de auditoria de cada chamada Claude (usuário, área, seção, prompt
   hash, ferramentas, tokens, custo, resposta resumida, proveniência).
