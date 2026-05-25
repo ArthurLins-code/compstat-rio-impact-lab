@@ -1,3 +1,8 @@
+# NOTA: dependências consolidadas em ../requirements.txt (raiz do repo).
+# Este arquivo é mantido apenas como referência histórica das libs que a
+# pipeline de normalização precisa — instalar a partir da raiz é o caminho
+# oficial. Use:  pip install -r ../requirements.txt
+
 pandas>=2.0
 shapely>=2.0
 pyshp>=2.3
