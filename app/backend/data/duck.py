@@ -50,6 +50,14 @@ def _dinamica_existe() -> bool:
     return os.path.exists(_dinamica_path())
 
 
+def _chamados_1746_path() -> str:
+    return deps.silver("fact_chamados_1746.csv")
+
+
+def _chamados_1746_existe() -> bool:
+    return os.path.exists(_chamados_1746_path())
+
+
 # ---------------------------------------------------------------------------
 # Listagem / brief
 # ---------------------------------------------------------------------------
@@ -324,12 +332,34 @@ def matriz_temporal(area_id: int, janela: Optional[Janela] = None) -> dict:
 
 
 def fatores_por_orgao(area_id: int) -> List[dict]:
-    """Fatores urbanos (causa removível) por tipo e órgão responsável."""
-    rows = deps.query(
-        "SELECT category, orgao_responsavel, qtd FROM %s WHERE area_fm_id = ? "
-        "ORDER BY qtd DESC" % _gold("gold_fatores_orgao.csv"),
-        [area_id],
-    )
+    """Fatores urbanos (causa removível) por tipo e órgão responsável.
+
+    Quando o silver `fact_chamados_1746.csv` existe, soma os chamados do 1746
+    fechados aos contadores do gold (`gold_fatores_orgao.csv`), regrupando
+    por (category, orgao_responsavel). O 1746 é tratado como evidência
+    adicional de fator urbano — o esquema gold permanece intacto (Fase 5
+    pode promover o merge para a pipeline `run_gold`).
+    """
+    if not _chamados_1746_existe():
+        rows = deps.query(
+            "SELECT category, orgao_responsavel, qtd FROM %s WHERE area_fm_id = ? "
+            "ORDER BY qtd DESC" % _gold("gold_fatores_orgao.csv"),
+            [area_id],
+        )
+    else:
+        rows = deps.query(
+            "WITH u AS ("
+            "  SELECT category, orgao_responsavel, qtd FROM %s WHERE area_fm_id = ?"
+            "  UNION ALL "
+            "  SELECT category, orgao_responsavel, COUNT(*) AS qtd FROM %s "
+            "    WHERE TRY_CAST(area_fm_id AS INTEGER) = ? "
+            "    GROUP BY category, orgao_responsavel"
+            ") "
+            "SELECT category, orgao_responsavel, SUM(qtd) AS qtd FROM u "
+            "GROUP BY category, orgao_responsavel ORDER BY qtd DESC"
+            % (_gold("gold_fatores_orgao.csv"), _silver("fact_chamados_1746.csv")),
+            [area_id, area_id],
+        )
     return [
         {
             "category": r["category"],

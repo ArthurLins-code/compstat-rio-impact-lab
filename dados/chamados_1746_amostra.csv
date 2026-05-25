@@ -1,0 +1,16 @@
+id_chamado,tipo,subtipo,status,data_inicio,latitude,longitude,nome_bairro,area_fm_id
+1000001,Iluminação Pública,Lâmpada apagada,fechado,2024-08-12,-22.9110461,-43.1752216,Centro,20
+1000002,Iluminação Pública,Poste apagado,fechado,2024-09-03,-22.9120000,-43.1760000,Centro,20
+1000003,Iluminação Pública,Lâmpada apagada,fechado,2024-10-15,-22.9542228,-43.1929618,Botafogo,9
+1000004,Iluminação Pública,Lâmpada apagada,atendido,2024-11-22,-22.9428938,-43.181887,Botafogo,14
+1000005,Poda de Árvore,Solicitação de poda,fechado,2024-07-30,-22.9852504,-43.2150297,Ipanema,10
+1000006,Árvore em Área Pública,Solicitação de poda,fechado,2024-12-05,-22.9158000,-43.2172985,Tijuca,19
+1000007,Poda de Árvore,,encerrado,2024-09-19,-22.9110461,-43.1752216,Centro,20
+1000008,Coleta Domiciliar,Lixo acumulado em via pública,fechado,2024-08-25,-22.9026791,-43.2104142,Santo Cristo,2
+1000009,Limpeza Urbana,Lixo acumulado,fechado,2024-10-02,-22.9567946,-43.1776586,Botafogo,12
+1000010,Coleta Domiciliar,Lixo acumulado em via pública,fechado,2024-11-11,-22.9059516,-43.5609253,Campo Grande,11
+1000011,Manutenção de Calçada,,fechado,2024-09-08,-22.9110461,-43.1752216,Centro,20
+1000012,Reparo de Buraco em Calçada,,fechado,2024-10-22,-22.9542228,-43.1929618,Botafogo,9
+1000013,Manutenção de Calçada,,atendido,2024-11-30,-22.9428938,-43.181887,Botafogo,14
+1000014,Iluminação Pública,Lâmpada apagada,em_aberto,2024-12-15,-22.9110461,-43.1752216,Centro,20
+1000015,Acidente de Trânsito,Capotamento,fechado,2024-12-01,-22.9110461,-43.1752216,Centro,20
