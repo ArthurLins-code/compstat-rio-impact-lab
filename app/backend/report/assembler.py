@@ -85,6 +85,9 @@ def aplicar_edicao(
     Aceita camelCase (campos do Relatorio) e snake_case (sectionId do copiloto),
     normalizando para a chave canônica. `autor` ('humano'|'ia') distingue a
     origem da edição — alimenta o diff humano×IA da Tarefa 2.4.
+
+    Quando PERSISTENT_STATE, também grava um snapshot completo em
+    `relatorios_versoes` com origem = `autor`.
     """
     secao = _ALIAS_SECAO.get(secao, secao)
     if secao not in SECOES_EDITAVEIS:
@@ -94,7 +97,13 @@ def aplicar_edicao(
         )
     if config.PERSISTENT_STATE:
         from ..db import overrides as O
+        from ..db import versoes as V
         O.salvar(area_id, secao, payload, autor=autor)
+        # Snapshot pós-edição para histórico — usa a mesma `get_relatorio` que
+        # o frontend consome, garantindo que a versão arquivada é exatamente
+        # o que estava sendo visto naquele momento.
+        rel_atual = get_relatorio(area_id)
+        V.snapshot(area_id, rel_atual.model_dump(), origem=autor)
     else:
         REPORT_STATE.setdefault(area_id, {})[secao] = payload
 

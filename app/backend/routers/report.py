@@ -51,6 +51,38 @@ def get_report_coincidencias(area_id: int) -> M.MatchResult:
     return compute_match(area_id)
 
 
+@router.get("/report/{area_id}/versoes")
+def listar_versoes(area_id: int):
+    """Metadados das versões salvas do relatório (Tarefa 2.4).
+
+    503 quando PERSISTENT_STATE=0 — sem persistência não há versões.
+    """
+    from .. import config
+    if not config.PERSISTENT_STATE:
+        raise HTTPException(
+            status_code=503,
+            detail="Versionamento requer COMPSTAT_PERSISTENT_STATE=1.",
+        )
+    from ..db import versoes as V
+    return V.listar(area_id)
+
+
+@router.get("/report/{area_id}/versoes/{versao}")
+def obter_versao(area_id: int, versao: int):
+    """Snapshot completo de uma versão específica."""
+    from .. import config
+    if not config.PERSISTENT_STATE:
+        raise HTTPException(
+            status_code=503,
+            detail="Versionamento requer COMPSTAT_PERSISTENT_STATE=1.",
+        )
+    from ..db import versoes as V
+    snap = V.obter(area_id, versao)
+    if snap is None:
+        raise HTTPException(status_code=404, detail="Versão não encontrada.")
+    return snap
+
+
 @router.patch("/report/{area_id}/section/{secao}")
 def patch_report_section(
     area_id: int, secao: str, payload: Dict[str, Any] = Body(...)
